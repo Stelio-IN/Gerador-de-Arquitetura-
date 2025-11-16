@@ -1,0 +1,5 @@
+{
+  "name": "Gerador de Diagrama de Arquitetura",
+  "description": "Uma aplicação web que utiliza a API Gemini para gerar um diagrama visual da arquitetura de um sistema com base numa descrição textual.",
+  "requestFramePermissions": []
+}
