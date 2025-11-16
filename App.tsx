@@ -3,12 +3,7 @@ import React, { useState, useCallback } from 'react';
 import { generateArchitectureImage } from './services/geminiService';
 import { Spinner } from './components/Spinner';
 
-const App: React.FC = () => {
-  const [imageUrl, setImageUrl] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const promptText = `Crie um diagrama de arquitetura de sistema detalhado e profissional para uma plataforma chamada 'SICE'. O diagrama deve ser limpo, moderno e fácil de entender, utilizando ícones de arquitetura padrão. Ele deve ilustrar claramente uma arquitetura de três camadas com os seguintes componentes:
+const defaultPrompt = `Crie um diagrama de arquitetura de sistema detalhado e profissional para uma plataforma chamada 'SICE'. O diagrama deve ser limpo, moderno e fácil de entender, utilizando ícones de arquitetura padrão. Ele deve ilustrar claramente uma arquitetura de três camadas com os seguintes componentes:
 
 1. **Frontend (Camada Cliente):** Rotulado como 'Frontend (PWA)'. Mostre ícones representando vários dispositivos (desktop, tablet, celular) conectando-se a ele. A tecnologia é React.
 
@@ -18,12 +13,22 @@ const App: React.FC = () => {
 
 O diagrama deve mostrar o fluxo de dados/solicitações dos dispositivos do usuário, através do frontend, para o backend e, finalmente, para a base de dados, e de volta. Use setas para indicar o fluxo de comunicação. O estilo geral deve ser profissional e adequado para uma apresentação técnica.`;
 
+const App: React.FC = () => {
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [prompt, setPrompt] = useState<string>(defaultPrompt);
+
   const handleGenerateImage = useCallback(async () => {
+    if (!prompt.trim()) {
+      setError('A descrição não pode estar vazia.');
+      return;
+    }
     setIsLoading(true);
     setError(null);
     setImageUrl(null);
     try {
-      const url = await generateArchitectureImage(promptText);
+      const url = await generateArchitectureImage(prompt);
       setImageUrl(url);
     } catch (err) {
       setError('Falha ao gerar a imagem. Por favor, tente novamente.');
@@ -31,32 +36,30 @@ O diagrama deve mostrar o fluxo de dados/solicitações dos dispositivos do usu�
     } finally {
       setIsLoading(false);
     }
-  }, [promptText]);
+  }, [prompt]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col items-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-4xl text-center">
-        <header className="mb-8">
+      <div className="w-full max-w-4xl">
+        <header className="mb-8 text-center">
           <h1 className="text-4xl sm:text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 mb-2">
             Gerador de Diagrama de Arquitetura AI
           </h1>
           <p className="text-lg text-gray-400">
-            Gere uma visualização da arquitetura do seu sistema SICE com um único clique.
+            Descreva a arquitetura do seu sistema e gere uma visualização com um único clique.
           </p>
         </header>
 
         <main className="flex flex-col items-center">
           <div className="w-full bg-gray-800 rounded-lg p-6 shadow-2xl mb-8 border border-gray-700">
-            <h2 className="text-xl font-bold mb-3 text-left text-gray-200">Descrição do Sistema SICE</h2>
-            <p className="text-gray-300 text-left whitespace-pre-wrap font-mono text-sm bg-gray-900 p-4 rounded-md">
-              O SICE foi concebido como uma Plataforma Web Progressiva (PWA) com uma arquitectura de três camadas:
-              <br/><br/>
-              - <span className="font-semibold text-blue-300">Frontend:</span> Interface responsiva em React, compatível com qualquer dispositivo.
-              <br/>
-              - <span className="font-semibold text-green-300">Backend:</span> API RESTful em Node.js, com autenticação e autorização avançadas.
-              <br/>
-              - <span className="font-semibold text-orange-300">Base de Dados:</span> MySQL, para garantir a integridade e consistência dos dados académicos.
-            </p>
+            <h2 className="text-xl font-bold mb-4 text-left text-gray-200">Descrição da Arquitetura</h2>
+            <textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              className="w-full h-60 bg-gray-900 text-gray-300 p-4 rounded-md border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none font-mono text-sm resize-y"
+              placeholder="Descreva a arquitetura do sistema que você deseja visualizar..."
+              aria-label="Descrição da Arquitetura"
+            />
           </div>
           
           <button
